@@ -1,7 +1,10 @@
 package app.andrey_voroshkov.chorus_laptimer;
 
+import android.os.Environment;
 import android.view.View;
 import android.view.ViewGroup;
+
+import java.io.File;
 
 /**
  * Created by Andrey_Voroshkov on 1/29/2017.
@@ -175,25 +178,15 @@ public class Utils {
         }
     }
 
-    /**
-     * This function will remove all the commas in the string then return the new string.
-     * @param name
-     * @return name without commas.
-     */
-    public static String removeCommas(String name){
-        String result = null;
-        if(name != null && name.contains(",")){
-            String[] splitName = name.split(",");
-            StringBuilder sBuilder = new StringBuilder();
-            for(int i = 0; i < splitName.length; i++){
-                sBuilder.append(splitName[i]);
-            }
-            result = sBuilder.toString();
-
-        } else {
-            result = name;
-        }
-        return result;
+    public static String getReportPath(){
+        return Environment.getExternalStorageDirectory() + File.separator  + "ChorusRFLaptimer Reports" + File.separator;
     }
 
+    public static final int bkColorPalette[] = {
+        0xFF4ECDC4, 0xFFC7F464, 0xFFFF6B6B, 0xFFC44D58, 0xFF3E4CB2, 0xFF049652, 0xFF6F8206, 0xFFF7C683, 0xFF6FDB7E, 0xFF556270
+    };
+
+    public static int getBackgroundColorItem(int orderNumber) {
+        return bkColorPalette[orderNumber % bkColorPalette.length];
+    }
 }

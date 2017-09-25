@@ -2,7 +2,6 @@ package app.andrey_voroshkov.chorus_laptimer;
 
 import android.app.ProgressDialog;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
@@ -274,20 +273,14 @@ public class RaceResultFragment extends Fragment {
         //iterate per pilot
         for(int i = 0; i < AppState.getInstance().deviceStates.size(); i++){
             ArrayList<LapResult> pilotResults = raceResults.get(i);
+            int pilotLaps = pilotResults.size();
             String pilot = AppState.getInstance().deviceStates.get(i).pilotName;
             //iterate per lap of each pilot. till allowed number of laps.
-            for(int j = startOfLapCount; j <= numLaps; j++){
-                int lapCount = 0;
+            for(int j = startOfLapCount; j < pilotLaps; j++){
                 //if shouldSkipFirstLap, lapCount will start from 1
-                if(shouldSkipFirstLap){
-                    lapCount = j;
-                } else {
-                    lapCount = j + 1;
-                }
-                if (pilotResults.size() > j) {
-                    LapResult lapResult = pilotResults.get(j);
-                    sb.append(lapCount + "," + pilot + "," + Utils.convertMsToReportTime(lapResult.getMs()) + "\n");
-                }
+                int lapNumber = shouldSkipFirstLap ? j : j + 1;
+                LapResult lapResult = pilotResults.get(j);
+                sb.append(lapNumber + "," + pilot + "," + Utils.convertMsToReportTime(lapResult.getMs()) + "\n");
             }
         }
         System.out.println(sb.toString());
@@ -304,7 +297,7 @@ public class RaceResultFragment extends Fragment {
         String report = generateCSVReportString();
         Date today = new Date();
 
-        String path = Environment.getExternalStorageDirectory() + File.separator  + "ChorusRFLaptimer Reports" + File.separator;
+        String path = Utils.getReportPath();
 
         // Create the folder.
         File folder = new File(path);

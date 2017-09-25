@@ -39,6 +39,7 @@ This is a "lightweight" alternative to IR lap timing systems having the advantag
         - [App User Guide](#app-user-guide)
 - [Setup and Usage Guide](#setup-and-usage-guide)
 - [Troubleshooting](#troubleshooting)
+- [Contributors](#contributors)
 - [Contacts](#contacts)
 
 <!-- /MarkdownTOC -->
@@ -122,6 +123,8 @@ Parts may be connected directly without using any additional components:
 
 **UPDATE:** powering RX5808 from Arduino's VCC was a bad idea - Pro Mini's linear regulator might not be able to provide enough power for RX, so use raw 5V power instead.
 
+**UPDATE #2:** powering Arduino via RAW pin is also a bad idea if you use external stabilized 5V power supply - Arduino's internal voltage regulator might significantly drop voltage thus making LiPo monitor calculations wrong. Supply 5V power to VCC pin instead (as shown on the updated wiring diagram).
+
 Note the resistor divider for LiPo Battery monitoring. Although just one of the Solo devices in a Chorus should be connected to LiPo battery for monitoring, but make sure to have A0 Arduino pins on all other Solo devices connected to Ground (via 1K resistor) or just solder the resistors on each Solo device according to schematic.
 
 <img src="docs/img/wiring_solo.png" alt="Wiring Solo schematic" width="400">
@@ -136,7 +139,11 @@ Schematic and PCB design in DipTrace format are available in the **DipTrace** fo
 
 <img src="docs/img/Schematic.png" alt="Schematic" width="400">
 
-<img src="docs/img/PCB.png" alt="Printed Circuit Board" width="200">
+<img src="docs/img/pcb_voroshkov.png" alt="Printed Circuit Board" width="200">
+
+[**PCB by Joao Reis**](contributors/PCB/Joao_Reis_PCB_Project_v1.1.zip) (Gerber format, SeedStudio compatible):
+
+<img src="docs/img/pcb_reis.png" alt="PCB by Joao Reis" width="200">
 
 <a name="assembly-of-a-solo-device"></a>
 ### Assembly of a Solo device
@@ -235,6 +242,19 @@ If the app connects to Bluetooth module but doesn't seem to communicate with the
 2. Bluetooth module baud rate must correspond to Arduino's: 115200 baud
 3. Loopback jumper must be in place.
 4. Wiring :)
+
+<a name="contributors"></a>
+## Contributors
+
+Big thanks to all contributors to this project:
+
+Android app:
+- Louis Plett (highway11) - voice speaking
+- Ray Erik Rabe (raveerk) - CSV reports generation
+- evgen48 - display frequencies in MHz
+
+Arduino app:
+- anunique - arbitrary frequency setting, predefined Connex frequencies
 
 <a name="contacts"></a>
 ## Contacts

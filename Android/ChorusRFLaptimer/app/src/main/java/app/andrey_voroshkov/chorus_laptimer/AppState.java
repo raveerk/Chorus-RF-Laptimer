@@ -20,7 +20,7 @@ public class AppState {
     public static final int MAX_RSSI = 315;
     public static final int RSSI_SPAN = MAX_RSSI - MIN_RSSI;
     public static final int CALIBRATION_TIME_MS = 10000;
-    public static final String bandNames [] = {"Race", "A", "B", "E", "F", "D"};
+    public static final String bandNames [] = {"Race", "A", "B", "E", "F", "D", "Connex1", "Connex2"};
     public static final int DEFAULT_MIN_LAP_TIME = 5;
     public static final int DEFAULT_LAPS_TO_GO = 3;
 
@@ -322,6 +322,32 @@ public class AppState {
         }
     }
 
+    // Channels to send to the SPI registers
+    private static int channelTable[]  = {
+            // Channel 1 - 8
+            // Channel 1 - 8
+            5658, 5695, 5732, 5769, 5806, 5843, 5880, 5917, // Raceband
+            5865, 5845, 5825, 5805, 5785, 5765, 5745, 5725, // Band A
+            5733, 5752, 5771, 5790, 5809, 5828, 5847, 5866, // Band B
+            5705, 5685, 5665, 5645, 5885, 5905, 5925, 5945, // Band E
+            5740, 5760, 5780, 5800, 5820, 5840, 5860, 5880, // Band F / Airwave
+            5362, 5399, 5436, 5473, 5510, 5547, 5584, 5621, // Band D / 5.3
+            5180, 5200, 5220, 5240, 5745, 5765, 5785, 5805, // connex
+            5825, 5845, 5845, 5845, 5845, 5845, 5845, 5845  // even more connex, last 6 unused!!!
+    };
+
+    // TODO: replace usage of predefined channelTable with reading of frequency from devices
+    public  String getFrequencyText(int deviceId) {
+        if (deviceStates == null) return "";
+        if (deviceStates.size() <= deviceId) return "";
+        DeviceState devState = deviceStates.get(deviceId);
+        int tableIndex = devState.band * 8 + devState.channel;
+        if (tableIndex < channelTable.length) {
+            return new Integer(channelTable[tableIndex]).toString() + "MHz";
+        }
+        return "- MHz";
+    }
+
     public String getChannelText(int deviceId) {
         if (deviceStates == null) return "";
         if (deviceStates.size() <= deviceId) return "";
@@ -458,7 +484,9 @@ public class AppState {
 
         if (!currentState.pilotName.equals(pilot)) {
             //don't allow pilot names with comma because it will break CSV report
-            pilot = Utils.removeCommas(pilot);
+            if(pilot.contains(",")){
+                pilot = pilot.replace(",", "");
+            }
             currentState.pilotName = pilot;
             emitEvent(DataAction.DevicePilot);
             AppPreferences.save(AppPreferences.DEVICE_PILOTS);
@@ -477,6 +505,7 @@ public class AppState {
         if (currentState.threshold != threshold) {
             currentState.threshold = threshold;
             emitEvent(DataAction.DeviceThreshold);
+            AppPreferences.save(AppPreferences.DEVICE_THRESHOLDS);
         }
     }
 
@@ -600,14 +629,16 @@ public class AppState {
             if (shouldSpeakLapTimes) {
                 DeviceState currentState = deviceStates.get(deviceId);
                 String textToSay = currentState.pilotName;
-                if (!this.shouldSkipFirstLap || lapNumber != 0) {
-                    if (isJustFinished(deviceId)) {
-                        textToSay = textToSay + " finished";
-                    } else if (getIsFinished(deviceId)) {
-                        textToSay = textToSay + " already finished";
-                    }
-                    textSpeaker.speak(textToSay + ". Lap " + Integer.toString(lapNumber) + ". " + Utils.convertMsToSpeakableTime(lapTime));
+
+                if (this.shouldSkipFirstLap && lapNumber == 0) return; // don't speak the lap which is skipped
+
+                if (isJustFinished(deviceId)) {
+                    textToSay = textToSay + " finished";
+                } else if (getIsFinished(deviceId)) {
+                    textToSay = textToSay + " already finished";
                 }
+                int lapNumberToSpeak = this.shouldSkipFirstLap ? lapNumber : lapNumber + 1; // adjust to avoid lap number "zero"
+                textSpeaker.speak(textToSay + ". Lap " + Integer.toString(lapNumberToSpeak) + ". " + Utils.convertMsToSpeakableTime(lapTime));
             }
         }
     }
@@ -691,7 +722,7 @@ public class AppState {
         deviceTransmissionStates.set(deviceId, true);
 
         if (isDevicesInitializationOver()) {
-            //run or stop RSSI monitoring after connecction, only after all device states are received
+            //run or stop RSSI monitoring after connection, only after all device states are received
             if (raceState == null) {
                 return;
             }

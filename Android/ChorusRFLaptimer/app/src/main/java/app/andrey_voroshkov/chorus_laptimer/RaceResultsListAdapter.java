@@ -116,6 +116,9 @@ public class RaceResultsListAdapter extends BaseExpandableListAdapter {
             textBestLap.setText("-");
         }
 
+        View colorStrip = convertView.findViewById(R.id.resultColorStrip);
+        colorStrip.setBackgroundColor(Utils.getBackgroundColorItem(groupPosition));
+
         return convertView;
     }
 
@@ -130,6 +133,7 @@ public class RaceResultsListAdapter extends BaseExpandableListAdapter {
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
 
         Boolean isEnabled = AppState.getInstance().getIsPilotEnabled(groupPosition);
+        boolean shouldSkipFirstLap = AppState.getInstance().shouldSkipFirstLap;
 
         LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
@@ -156,8 +160,9 @@ public class RaceResultsListAdapter extends BaseExpandableListAdapter {
             return convertView;
         }
 
+        int lapNumber = shouldSkipFirstLap ? childPosition : childPosition + 1;
         TextView textChild = (TextView) convertView.findViewById(R.id.textChild);
-        textChild.setText("Lap # " + childPosition + ":  " + mGroups.get(groupPosition).get(childPosition).getDisplayTime());
+        textChild.setText("Lap # " + lapNumber + ":  " + mGroups.get(groupPosition).get(childPosition).getDisplayTime());
 
         int bestLapId = AppState.getInstance().getBestLapId(groupPosition);
         int colorId = (childPosition == bestLapId) ? R.color.colorRaceResultChildBest : R.color.colorRaceResultChild;
